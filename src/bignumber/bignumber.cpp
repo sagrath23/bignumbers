@@ -12,6 +12,7 @@
 //initialize zero with an unsigned long zero
 sdb sdb::zero = 0ul;
 
+/* Function to convert a unsigned long number into a std::basic_string<unsigned char>*/
 sdb::bufferType sdb::conv_ulong ( unsigned long n ) {
     if ( n == 0 )
         return bufferType ( 1, 0 );
@@ -28,10 +29,12 @@ sdb::bufferType sdb::conv_ulong ( unsigned long n ) {
     return t;
 }
 
+/* Function to convert a double number into a std::basic_string<unsigned char>*/
 sdb::bufferType sdb::conv_float ( double x ) {
     return conv_ulong ( (unsigned long) ( std::abs(x) ) );
 }
 
+/* Function to convert a string into a std::basic_string<unsigned char>*/
 sdb::bufferType sdb::conv_string ( const string& s ) {
     bufferType t ( 1, 0 );
     t.reserve ( s.size() );
@@ -47,14 +50,16 @@ sdb::bufferType sdb::conv_string ( const string& s ) {
     return t;
 }
 
+/* Function that remove leading zeroes from std::basic_string<unsigned char>*/
 sdb::bufferType& sdb::remove_zero ( bufferType& b ) {
     while ( b.size() > 1 && b[b.size()-1] == 0 )
         b = b.substr(0,b.size()-1);
     return b;
 }
 
+/* Function used to remove sign from zero values*/
 sdb::reference sdb::normalize() {
-    // leading 0
+    // remove leading 0
     remove_zero(buffer);
 
     // +-0
@@ -64,6 +69,7 @@ sdb::reference sdb::normalize() {
     return *this;
 }
 
+/* Function to convert a double number into a std::basic_string<unsigned char>*/
 void sdb::overflow ( unsigned start ) {
     for ( unsigned i = start; i < buffer.size() && buffer[i] >= 10; i++ )
     {

@@ -22,7 +22,7 @@ Function to print in prompt each position of the input array
 */
 void printArray(vector<BigNumber> arr)
 {
-    for (int i = 0; i < arr.size(); i++)
+    for (unsigned i = 0; i < arr.size(); i++)
     {
         cout << arr[i].str() + "\n" <<endl;
     }
@@ -224,7 +224,7 @@ void *task1 (void *dummyPt)
     printArray(numbers);
     cout << "sum elements..." << endl;
     BigNumber acm;
-    for(int i = 0; i < numbers.size(); i++){
+    for(unsigned i = 0; i < numbers.size(); i++){
         acm += numbers[i];
     }
     cout << "result" << endl;
@@ -233,7 +233,7 @@ void *task1 (void *dummyPt)
     //now, send data back to user
     
     
-    for(int i = 0; i < numbers.size(); i++){
+    for(unsigned i = 0; i < numbers.size(); i++){
         write(connFd, numbers[i].str().data(), strlen(numbers[i].str().data()));    
     }
     //finally, send the result of the sum
@@ -242,4 +242,5 @@ void *task1 (void *dummyPt)
     write(connFd, "exit", strlen("exit"));
     cout << "\nClosing thread and conn" << endl;
     close(connFd);
+    return 0;
 }
