@@ -92,28 +92,34 @@ void sdb::underflow ( unsigned start ) {
 }
 
 // constructors
+//copy constructor from unsigned long
 sdb::sdb ( unsigned long n ) : sign_(false), buffer ( conv_ulong(n) ) {
     normalize();
 }
 
+//copy constructor from signed long
 sdb::sdb ( signed long n ) : sign_( n < 0 ), buffer ( conv_ulong(std::abs(n)) ) {
     normalize();
 }
 
+//copy constructor from int
 sdb::sdb ( int n ) : sign_( n < 0 ), buffer ( conv_ulong(std::abs(n)) ) {
     normalize();
 }
 
+//copy constructor from double
 sdb::sdb ( double x ) : sign_( x < 0 ), buffer ( conv_float(x) ) {
     normalize();
 }
 
+//copy constructor from string
 sdb::sdb ( const string& s ) : sign_(false), buffer ( conv_string(s) ) {
     if ( s[0] == '-' )
         sign_ = true;
     normalize();
 }
 
+//copy constructor from char
 sdb::sdb ( const char* s ) : sign_(false), buffer ( conv_string(s) ) {
     if ( s[0] == '-' )
         sign_ = true;
