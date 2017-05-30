@@ -229,12 +229,15 @@ void *task1 (void *dummyPt)
     cout << acm << endl;
 
     //now, send data back to user
-    write(connFd, "exit", strlen("exit"));
-    /**
+    
+    
     for(int i = 0; i < numbers.size(); i++){
-        write(connFd, numbers[i].str(), strlen(numbers[i].str()));    
+        write(connFd, numbers[i].str().data(), strlen(numbers[i].str().data()));    
     }
-*/
+    //finally, send the result of the sum
+    write(connFd, acm.str().data(), strlen(acm.str().data()));    
+    //and finish connection
+    write(connFd, "exit", strlen("exit"));
     cout << "\nClosing thread and conn" << endl;
     close(connFd);
 }
