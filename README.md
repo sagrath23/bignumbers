@@ -10,11 +10,11 @@ the server, which will execute some operations, in this order:
 To run this app, just clone this repository. Then, get into the folder and use make to compile and 
 generate executables.
 
-Use make all to compile all sources of the app
-Use make client to compile only client source
-Use make server to compile only server source
-Use make number to compile only BigNumber source
-Use make clean to delete all executables
+* Use make all to compile all sources of the app
+* Use make client to compile only client source
+* Use make server to compile only server source
+* Use make number to compile only BigNumber source
+* Use make clean to delete all executables
 
 In order to execute correctly this app, first execute server app typing this command in console:
 ```sh
