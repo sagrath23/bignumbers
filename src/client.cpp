@@ -1,134 +1,135 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
 #include <string.h>
+#include <cstring>
+#include <unistd.h>
+#include <stdio.h>
+#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
-
-#include "bignumber/bignumber.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <strings.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 using namespace std;
 
-/*
-Function to display controlled errors
-*/
 void error(const char *msg)
 {
     perror(msg);
     exit(0);
 }
 
-/*
-Main function of the client
-*/
 int main(int argc, char *argv[])
 {
-    //to start a socket in client, are defined: 
-    int socketFileDescr;//the socket fileDescriptor
-    int portNumber;//the port that will be used to send data to server
-    int n;//and the number of bits sent
-    //also, are defined
-    struct sockaddr_in serverAddress;//an structure to handle the server's address
-    struct hostent *server;//and a structure to handle the information of the server host
-    
-    string result;//this string will be store the information readed fron the file
+    int listenFd, portNo;
+    bool loop = false;
+    struct sockaddr_in svrAdd;
+    struct hostent *server;
 
-    char buffer[256];//this is the buffer used to read server responses
-
-    //to start the client, are validated the number of arguments introduced in the prompt
-    if (argc < 4) // ./client host port route_to_file
+    if (argc < 4)
     {
-        fprintf(stderr, "usage %s hostname port file\n", argv[0]);
-        exit(0);
-    }
-    else{
-        printf("Arguments OK...\n");
+        cerr << "Syntax : ./client <host name> <port> <route_to_file>" << endl;
+        return 0;
     }
 
-    portNumber = atoi(argv[2]);//convert to int the port number
-    socketFileDescr = socket(AF_INET, SOCK_STREAM, 0);//and create a socket that use ip v.4 to stream data 
-
-    if (socketFileDescr < 0)//validate the creation of the socket
+    portNo = atoi(argv[2]);
+    //validate port number
+    if ((portNo > 65535) || (portNo < 2000))
     {
-        error("ERROR opening socket");
-    }
-    else{
-        printf("Socket opened...\n");
+        cerr << "Please enter port number between 2000 - 65535" << endl;
+        return 0;
     }
 
-    server = gethostbyname(argv[1]); //get the information of the server
-    if (server == NULL)//and verify that the specified host exists
+    //create client skt
+    listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (listenFd < 0)
     {
-        fprintf(stderr, "ERROR, no such host\n");
-        exit(0);
+        cerr << "Cannot open socket" << endl;
+        return 0;
     }
-    else{
-        printf("Host founded...\n");
-    }
-    //now, erase the data reated to server address
-    bzero((char *)&serverAddress, sizeof(serverAddress));
-    //and set it again using server reference
-    serverAddress.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, (char *)&serverAddress.sin_addr.s_addr, server->h_length);
-    serverAddress.sin_port = htons(portNumber);
-    //and try to stablish a connection 
-    if (connect(socketFileDescr, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+
+    server = gethostbyname(argv[1]);
+
+    if (server == NULL)
     {
-        error("ERROR connecting");
+        cerr << "Host does not exist" << endl;
+        return 0;
     }
-    else{
-        printf("Connection OK...\n");
+
+    bzero((char *)&svrAdd, sizeof(svrAdd));
+    svrAdd.sin_family = AF_INET;
+
+    bcopy((char *)server->h_addr, (char *)&svrAdd.sin_addr.s_addr, server->h_length);
+
+    svrAdd.sin_port = htons(portNo);
+
+    int checker = connect(listenFd, (struct sockaddr *)&svrAdd, sizeof(svrAdd));
+
+    if (checker < 0)
+    {
+        cerr << "Cannot connect!" << endl;
+        return 0;
     }
-    //if the connection are stablished
-    //start to read the file specified in console
+
+    //send stuff to server
+    char output[300];
+    int n;
     ifstream fileToRead;
-    cout<<"File to Open: ";
-    cout<< argv[3]<<endl;
+    //open file and start to send each line
+    cout << "File to Open: " << argv[3] << endl;
     fileToRead.open(argv[3]);
-    char output[256];
     if (fileToRead.is_open())
     {
-        printf("File Opened...\n");
-        //and concatenate every line in a string variable
-        //(i really need tofinda better way to serialize data to send via sockets)
         while (!fileToRead.eof())
         {
+            //clean buffer
+            bzero(output, 301);
+            //read line
             fileToRead >> output;
-            string line;
-            line = string(output);
-            result += line + "/";
+            cout << output << endl;
+            //and sent it to the server
+            n = write(listenFd, output, strlen(output));
+            if (n < 0)
+            {
+                error("ERROR writing to socket");
+            }
+            else
+            {
+                cout << n + " bytes are sent to server..." << endl;
+            }
         }
-        printf("File readed...\n");
-        cout<< result<<endl;
     }
-    else{
-        error("ERROR opening file");
+    else
+    {
+        error("1-ERROR opening file");
     }
-    //close the file
+    //close file
     fileToRead.close();
-    printf("File Closed...\n");
-    
-    //and write the file information in the socket.
-    n = write(socketFileDescr, result.data(), result.capacity());
-    
-    if (n < 0){
-        error("ERROR writing to socket");
+    //and wait for response
+    /*for(;;){
+        char s[300];
+        //cin.clear();
+        //cin.ignore(256, '\n');
+        cout << "waiting...";
+        bzero(s, 301);
+        read(listenFd, s, 300);
+    }*/
+
+    for (;;)
+    {
+        char s[300];
+        //cin.clear();
+        //cin.ignore(256, '\n');
+        cout << "Enter stuff: ";
+        bzero(s, 301);
+        cin.getline(s, 300);
+        
+        write(listenFd, s, strlen(s));
     }
-    else{
-        cout << n+" bytes are sent to server..."<<endl;
-    }
-    //no, just wait for server response    
-    bzero(buffer, 256);
-    n = read(socketFileDescr, buffer, 255);
-    if (n < 0){
-        error("ERROR reading from socket");
-    }
-    //and print it.
-    printf("%s\n", buffer);
-    close(socketFileDescr);
-    return 0;
 }
