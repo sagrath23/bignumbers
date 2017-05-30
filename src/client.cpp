@@ -94,33 +94,36 @@ int main(int argc, char *argv[])
             fileToRead >> output;
             cout << output << endl;
             //and sent it to the server
-            n = write(listenFd, output, strlen(output));
-            if (n < 0)
-            {
-                error("ERROR writing to socket");
-            }
-            else
-            {
-                cout << n + " bytes are sent to server..." << endl;
-            }
+            n = write(listenFd, output, strlen(output));    
         }
     }
     else
     {
-        error("1-ERROR opening file");
+        error("ERROR opening file");
     }
     //close file
     fileToRead.close();
+    n = write(listenFd, "process", strlen("process"));
     //and wait for response
-    /*for(;;){
+    for(;;){
         char s[300];
         //cin.clear();
         //cin.ignore(256, '\n');
-        cout << "waiting...";
         bzero(s, 301);
         read(listenFd, s, 300);
-    }*/
-
+        string tester (s);
+        if(tester == "exit"){
+            break;
+        }else{
+            if(strlen(s) != 0){
+                cout<<s<<endl;
+            }
+        }
+        //cout << s << endl;
+    }
+    close(listenFd);
+    return 0;
+/*
     for (;;)
     {
         char s[300];
@@ -131,5 +134,5 @@ int main(int argc, char *argv[])
         cin.getline(s, 300);
         
         write(listenFd, s, strlen(s));
-    }
+    }*/
 }

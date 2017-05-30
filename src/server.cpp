@@ -201,18 +201,18 @@ void *task1 (void *dummyPt)
     bzero(test, 301);
     bool loop = false;
     while(!loop)
-    {    
+    {       
         bzero(test, 301);
 
         read(connFd, test, 300);
         
         string tester (test);
+        if(tester == "process"){
+            break; 
+        }
         cout << tester << endl;
         BigNumber number(tester);
         numbers.push_back(number);
-       
-        if(tester == "exit")
-            break;
     }
     //proceed to order the array
     cout << "unordered" << endl;
@@ -228,6 +228,13 @@ void *task1 (void *dummyPt)
     cout << "result" << endl;
     cout << acm << endl;
 
+    //now, send data back to user
+    write(connFd, "exit", strlen("exit"));
+    /**
+    for(int i = 0; i < numbers.size(); i++){
+        write(connFd, numbers[i].str(), strlen(numbers[i].str()));    
+    }
+*/
     cout << "\nClosing thread and conn" << endl;
     close(connFd);
 }
