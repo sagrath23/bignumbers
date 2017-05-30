@@ -168,7 +168,7 @@ unsigned long sdb::ulong() const {
     return t;
 }
 
-sdb::string sdb::str() const {
+string sdb::str() const {
     string r ( buffer.size()+1, 0 );
     r[0] = sign_ ? '-' : '+';
     for ( unsigned i = 1; i <= buffer.size(); i++ )

@@ -3,16 +3,17 @@
 #include <string>
 #include <iosfwd>
 
+using namespace std;
+
 class BigNumber
 {
     private:
 
-        typedef signed char                     digitType;
-        typedef std::basic_string<digitType>   bufferType;
-        typedef BigNumber           value;
-        typedef BigNumber&          reference;
-        typedef const BigNumber&    constantRef;
-        typedef std::string                     string;
+        typedef signed char                     digitType; //type of each digit in the number
+        typedef std::basic_string<digitType>   bufferType; //type of buffer to store all number digits
+        typedef BigNumber                           value; //type of return as value
+        typedef BigNumber&                      reference; //type of return as reference
+        typedef const BigNumber&              constantRef; //type of return as a constant reference
 
         static bufferType& remove_zero ( bufferType& );
 

@@ -105,30 +105,32 @@ void mergeSort(vector<BigNumber> &arr, int l, int r)
     }
 }
 
+//Prototype function to allow multithreading
 void *task1(void *);
 
+//socket file definition to income conection
 static int connFd;
 
 int main(int argc, char* argv[])
 {
-    int pId, portNo, listenFd;
-    socklen_t len; //store size of the address
-    bool loop = false;
-    struct sockaddr_in svrAdd, clntAdd;
+    //define portNumber and socket listener file definition
+    int portNo, listenFd;
+    struct sockaddr_in svrAdd, clntAdd;//server and client addresses
     
-    pthread_t threadA[3];
+    pthread_t threadA[3]; //threads that server can handle
     
+    //first, check the input parameter
     if (argc < 2)
     {
         cerr << "Syntam : ./server <port>" << endl;
         return 0;
     }
     
-    portNo = atoi(argv[1]);
-    
-    if((portNo > 65535) || (portNo < 2000))
+    portNo = atoi(argv[1]);//and convert the port specified in integer
+    //check if this port are in a safe range
+    if((portNo > 65535) || (portNo < 2000) ||(portNo == 80))
     {
-        cerr << "Please enter a port number between 2000 - 65535" << endl;
+        cerr << "Please enter a port number between 2000 - 65535 or 80" << endl;
         return 0;
     }
     
@@ -140,9 +142,9 @@ int main(int argc, char* argv[])
         cerr << "Cannot open socket" << endl;
         return 0;
     }
-    
+    //clear svrAdd
     bzero((char*) &svrAdd, sizeof(svrAdd));
-    
+    //and set new values
     svrAdd.sin_family = AF_INET;
     svrAdd.sin_addr.s_addr = INADDR_ANY;
     svrAdd.sin_port = htons(portNo);
@@ -153,16 +155,16 @@ int main(int argc, char* argv[])
         cerr << "Cannot bind" << endl;
         return 0;
     }
-    
+    //and set to listen state
     listen(listenFd, 5);
-    
-    len = sizeof(clntAdd);
     
     int noThread = 0;
 
     while (noThread < 3)
     {
         cout << "Listening" << endl;
+
+        socklen_t  len = sizeof(clntAdd);//store size of the address
 
         //this is where client connects. svr will hang in this mode until client conn
         connFd = accept(listenFd, (struct sockaddr *)&clntAdd, &len);

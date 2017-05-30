@@ -18,6 +18,9 @@
 
 using namespace std;
 
+/*
+Function to handle errors
+*/
 void error(const char *msg)
 {
     perror(msg);
@@ -27,7 +30,6 @@ void error(const char *msg)
 int main(int argc, char *argv[])
 {
     int listenFd, portNo;
-    bool loop = false;
     struct sockaddr_in svrAdd;
     struct hostent *server;
 
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    //create client skt
+    //create client socket
     listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (listenFd < 0)
@@ -54,21 +56,22 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    //try to find server
     server = gethostbyname(argv[1]);
-
     if (server == NULL)
     {
         cerr << "Host does not exist" << endl;
         return 0;
     }
-
+    //clear svrAdd
     bzero((char *)&svrAdd, sizeof(svrAdd));
+    //define the protocol
     svrAdd.sin_family = AF_INET;
-
+    //copy the h_length bytes from svrAdd.sin_addr.s_addr to server->h_addr
     bcopy((char *)server->h_addr, (char *)&svrAdd.sin_addr.s_addr, server->h_length);
-
-    svrAdd.sin_port = htons(portNo);
-
+    //set the port in TCP Byte order
+    svrAdd.sin_port = htons(portNo); 
+    //try to connect to server
     int checker = connect(listenFd, (struct sockaddr *)&svrAdd, sizeof(svrAdd));
 
     if (checker < 0)
@@ -79,7 +82,6 @@ int main(int argc, char *argv[])
 
     //send stuff to server
     char output[300];
-    int n;
     ifstream fileToRead;
     //open file and start to send each line
     cout << "File to Open: " << argv[3] << endl;
@@ -94,7 +96,7 @@ int main(int argc, char *argv[])
             fileToRead >> output;
             cout << output << endl;
             //and sent it to the server
-            n = write(listenFd, output, strlen(output));    
+            write(listenFd, output, strlen(output));    
         }
     }
     else
@@ -103,36 +105,25 @@ int main(int argc, char *argv[])
     }
     //close file
     fileToRead.close();
-    n = write(listenFd, "process", strlen("process"));
+    write(listenFd, "process", strlen("process"));
     //and wait for response
     for(;;){
         char s[300];
-        //cin.clear();
-        //cin.ignore(256, '\n');
+        //clear buffer
         bzero(s, 301);
         read(listenFd, s, 300);
         string tester (s);
         if(tester == "exit"){
+            //break this loop
+            cout<<"ending execution..."<<endl;
             break;
         }else{
             if(strlen(s) != 0){
                 cout<<s<<endl;
             }
         }
-        //cout << s << endl;
     }
+    //close socket and end process
     close(listenFd);
     return 0;
-/*
-    for (;;)
-    {
-        char s[300];
-        //cin.clear();
-        //cin.ignore(256, '\n');
-        cout << "Enter stuff: ";
-        bzero(s, 301);
-        cin.getline(s, 300);
-        
-        write(listenFd, s, strlen(s));
-    }*/
 }
