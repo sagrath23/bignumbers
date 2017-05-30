@@ -17,9 +17,12 @@ Use make number to compile only BigNumber source
 Use make clean to delete all executables
 
 In order to execute correctly this app, first execute server app typing this command in console:
+```sh
+$ ./server <port>
+```
 
-./server <port>
 
-Then, run client app, typing this command in another console: 
-
-./client <host name> <port> <route_to_file> 
+Then, run client app, typing this command in another console:
+```sh
+$ ./client <host name> <port> <route_to_file>
+```
